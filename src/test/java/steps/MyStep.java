@@ -76,15 +76,13 @@ public class MyStep {
     public void поле_тип_содержит(List<String> dataTable) {
         WebElement addTypeList = Hooks.driver.findElement(By.xpath("//select[@id=\"type\"]"));
         String addTypeListText = addTypeList.getText();
-        int res = 0;
+
         for (String type : dataTable) {
 
-            if (addTypeListText.contains(type)) {
-                res++;
-            }
-        }
 
-        Assertions.assertTrue(res == dataTable.size(), "В выпадающем списке присутствуют не все обязательные значения");
+            Assertions.assertTrue(addTypeListText.contains(type), "нет поля - "+type);
+
+        }
 
     }
 
@@ -159,9 +157,16 @@ public class MyStep {
         } else {
             addType.selectByVisibleText(dataTable.get("Тип"));
         }
-        if (dataTable.get("Экзотический").contains("true")) {
-            addTypeExotic.click();
+        System.out.println(dataTable.get("Экзотический").contains("false")+"dataTable.get(\"Экзотический\").contains(\"false\")");
+        System.out.println((addTypeExotic.isSelected())+"(addTypeExotic.isSelected())");
+        if (dataTable.get("Экзотический").contains("true"))  {
+            if (!addTypeExotic.isSelected()){
+                addTypeExotic.click();}
+
+        } else {if (addTypeExotic.isSelected()){
+            addTypeExotic.click();}
         }
+
 
         saveBtn.click();
 
