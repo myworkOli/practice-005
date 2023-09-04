@@ -13,7 +13,7 @@ public class ConfProperties {
     static {
         try {
             //указание пути до файла с настройками
-            fileInputStream = new FileInputStream("C:\\Users\\Konstantin\\Desktop\\IBS УЧЕБА\\5. Практическое задание\\practic-5\\src\\test\\resources\\conf.properties");
+            fileInputStream = new FileInputStream("src\\test\\resources\\conf.properties");
             PROPERTIES = new Properties();
             PROPERTIES.load(fileInputStream);
         } catch (IOException e) {
