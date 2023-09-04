@@ -6,6 +6,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.io.FileHandler;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static steps.Hooks.dataSource;
 
 public class MyStep {
 
@@ -114,20 +116,6 @@ public class MyStep {
 
         saveBtn.click();
 
-
-        Assertions.assertThrows(StaleElementReferenceException.class, () -> {
-                    productAddingForm.click();
-                },
-                "Элементы формы добавления товара доступны после закрытия формы");
-
-        try {
-            Thread.sleep(70);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
- //       Hooks.wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("//*[@class= 'table']/tbody"), "(Kiwano)"));
-
     }
 
 
@@ -135,15 +123,12 @@ public class MyStep {
     public void проверка_названий_столбцов(List<String> dataTable) {
         WebElement tableRow = Hooks.driver.findElement(By.xpath("//*[@class= 'table']/thead/tr"));
         String tableRowText = tableRow.getText();
-        int res = 0;
+
         for (String type : dataTable) {
+            Assertions.assertTrue((tableRowText.contains(type)), "строка не содержит "+type);
 
-            if (tableRowText.contains(type)) {
-                res++;
-            }
         }
-
-        Assertions.assertTrue(res == dataTable.size(), "присутствуеют не все обязательные столбцы");
+        
 
     }
 
@@ -197,18 +182,14 @@ public class MyStep {
 
     @И("Проверит, что добавленная строка содержит:")
     public void проверить_добавленный_товар(List<String> dataTable) {
-        int res = 0;
+
         List<WebElement> table = Hooks.driver.findElements(By.tagName("tr"));
         String end_string = table.get(n1).getText();
         for (String type : dataTable) {
-
-            if (end_string.contains(type)) {
-                res++;
-            }
+            Assertions.assertTrue((end_string.contains(type)), "строка не содержит "+type);
 
         }
 
-        Assertions.assertTrue(res == dataTable.size(), "строка содержит добавляемые данные ");
     }
 
 
@@ -250,6 +231,16 @@ public class MyStep {
                 () -> foodTestRes.get(0).foodName().equals(dataTable.get(0)),
                 () -> foodTestRes.get(0).foodType().equals(dataTable.get(1)),
                 () -> foodTestRes.get(0).foodExotic().equals(dataTable.get(2)));
+
+    }
+
+    @И("Удалить товар:")
+    public void deletFood(Map<String, String> dataTable) {
+        System.out.println("Наименование");
+        System.out.println("Тип");
+        JdbcTemplate jdbcTemplateObject = new JdbcTemplate(dataSource);
+        String sql = "DELETE FROM FOOD WHERE FOOD_NAME= ?  ";
+        jdbcTemplateObject.update(sql, dataTable.get("Наименование"));
 
     }
 

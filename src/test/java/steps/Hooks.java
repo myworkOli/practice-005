@@ -15,8 +15,6 @@ import java.util.concurrent.TimeUnit;
 public class Hooks {
 
 
-    private final int START_ID = 4;
-
     public static WebDriver driver;
     public static WebDriverWait wait;
 
@@ -45,15 +43,6 @@ public class Hooks {
 
     }
 
-    @After(order = 1)
-    public void deletFood() {
-
-        JdbcTemplate jdbcTemplateObject = new JdbcTemplate(dataSource);
-        String sql = "DELETE FROM FOOD WHERE FOOD_ID > ?";
-        int update = jdbcTemplateObject.update(sql, START_ID);
-
-    }
-
 
     public static DataSource getH2DataSource() {
 
@@ -67,7 +56,5 @@ public class Hooks {
     }
 
 
-    public int getSTART_ID() {
-        return START_ID;
-    }
+
 }
