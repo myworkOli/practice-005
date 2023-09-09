@@ -3,8 +3,8 @@ package steps;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import static steps.Hooks.dataSource;
+import java.util.Map;
+import static steps.MyStepJDBC.dataSource;
 
 public class Metod {
     public record Food(Integer foodId, String foodName, String foodType, Integer foodExotic) {    }
@@ -31,6 +31,26 @@ public class Metod {
 
     }
 
+    public static void addFood(Map<String, String> food) {
+        String sql = "INSERT INTO FOOD(FOOD_NAME,FOOD_TYPE,FOOD_EXOTIC) VALUES (?,?,?)";
+        int x = 0;
+        if (food.get("Экзотический").contains("1")) {
+            x++;
+        }
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, food.get("Наименование"));
+            ps.setString(2, food.get("Тип"));
+            ps.setInt(3, x);
+            int result = ps.executeUpdate();
+            if (result != 1) {
+                throw new SQLException("не удалось добавить товар");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("нет соединения с базой");
+        }
+    }
+
     public static List<String> getColomsName() {
         List<String> colomsName = new ArrayList<String>();
         try (Connection connection = dataSource.getConnection()) {
@@ -39,12 +59,9 @@ public class Metod {
                 while (rs.next()) {
                     colomsName.add(rs.getString("COLUMN_NAME"));
                 }
-
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -53,31 +70,27 @@ public class Metod {
     }
 
         public static List<Food> getFoodTest(List<String> food) throws SQLException{
-        List<Food>  foodTest =new ArrayList<>();
-        String sql= "SELECT * FROM FOOD WHERE FOOD_NAME =? AND FOOD_TYPE = ? AND FOOD_EXOTIC =? ";
-        int x=0;
-        if (food.get(2).contains("true")){
-            x++;
-        }
-        try (Connection connection= dataSource.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql)){
+            List<Food>  foodTest =new ArrayList<>();
+            String sql= "SELECT * FROM FOOD WHERE FOOD_NAME =? AND FOOD_TYPE = ? AND FOOD_EXOTIC =? ";
+            int x=0;
+            if (food.get(2).contains("1")){
+                x++;
+            }
+            try (Connection connection= dataSource.getConnection();
+                 PreparedStatement ps = connection.prepareStatement(sql)){
                 ps.setString(1, food.get(0));
                 ps.setString(2, food.get(1));
                 ps.setInt(3,x);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    foodTest.add(new Food(rs.getInt("food_Id"),
-                            rs.getString("food_name"),
-                            rs.getString("food_type"),
-                            rs.getInt("FOOD_EXOTIC")));
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        foodTest.add(new Food(rs.getInt("food_Id"),
+                                rs.getString("food_name"),
+                                rs.getString("food_type"),
+                                rs.getInt("FOOD_EXOTIC")));
+                    }
                 }
             }
-        }
-
-
-
         return foodTest;
-
     }
 
 }
